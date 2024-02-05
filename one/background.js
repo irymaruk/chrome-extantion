@@ -19,12 +19,13 @@ function getAllCadNumbers() {
 }
 
 
-function doSearch() {
-  const allList = document.querySelectorAll("#parcel_registration_parcelsForUnion  label");
-  console.info('All list length =' + allList.length);
-  const cadNums = [...allList].map(n => n.innerText.replace(/ перетин.*/, ""));
-  console.info("CadNums = " + cadNums);
-  return cadNums;
+async function searchByNumber(cadNum, log) {
+    console.info("searchByNumber start info " + cadNum)
+    log("searchByNumber start");
+    const searchInput = await waitForElement("#cadastr_find_by_cadnum_cadNum");
+    await searchInput.value == '0721486901:01:001:1069';
+    document.querySelector("div.box-footer.text-right button").click();
+    sleep(1000);
 }
 
 function log(msg) {
@@ -48,7 +49,13 @@ async function waitForElement(selector, timeout = 15000) {
 }
 
 
-
+async function executeScriptWrap(tab, funcName, arguments = []) {
+  return await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    func: funcName,
+    args : arguments 
+  });
+}
 
 
 
@@ -57,20 +64,15 @@ chrome.action.onClicked.addListener(async (tab) => {
     await changeBadge(tab);
 
     log('Here');
-    const injectionResults = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: getAllCadNumbers
-    });
+    const injectionResults = await executeScriptWrap(tab, getAllCadNumbers);
 
     const res = injectionResults[0].result;
     log('Exctracted res = ' + res);
     const tab2 = await chrome.tabs.create({ url: searchUrl });
     await sleep(1000);
     
-    for (const num of res) {
-      // const tab2 = await chrome.tabs.update(tab.id, { url: searchUrl });
-      
-      await log("Number = " + num);
-    }
+    log("Search start");
+    await executeScriptWrap(tab2, searchByNumber, ["123", log]);
+    log("Search finished");
   }
 });

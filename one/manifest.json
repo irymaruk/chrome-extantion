@@ -10,5 +10,11 @@
   "permissions": ["scripting", "activeTab", "tabs"],
   "host_permissions": [
     "https://e.land.gov.ua/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://e.land.gov.ua/*"],
+      "js": ["content-script.js"]
+    }
   ]
 }

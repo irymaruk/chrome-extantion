@@ -43,16 +43,16 @@ chrome.action.onClicked.addListener(async (tab) => {
         const tab2 = await chrome.tabs.create({url: searchUrl});
 
         log("Search start");
-        let response = await chrome.tabs.sendMessage(tab2.id, {
+        let searchResp = await chrome.tabs.sendMessage(tab2.id, {
             type: "SEARCH",
             cadNumber: '0721486901:01:001:1069'
         });
-        log("Search finished");
+        log("Search finished " + searchResp);
 
         log("Download start");
-        await chrome.tabs.sendMessage(tab2.id, {
+        let downloadResp = await chrome.tabs.sendMessage(tab2.id, {
             type: "DOWNLOAD"
         });
-        log("Download finished");
+        log("Download finished " + downloadResp);
     }
 });

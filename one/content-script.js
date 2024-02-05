@@ -29,13 +29,22 @@
         await sleep(1000);
     }
 
+    async function downloadLnFile() {
+        log("downloadLnFile start");
+        const downloadBtn = await waitForElement("#in4btn");
+        downloadBtn.click();
+        await sleep(1000);
+    }
 
-    chrome.runtime.onMessage.addListener((obj, sender, response) => {
+
+    chrome.runtime.onMessage.addListener(async (obj, sender, response) => {
         const {type, cadNumber} = obj;
         if (type === "SEARCH") {
-            response(searchByNumber(cadNumber));
+            await searchByNumber(cadNumber);
+            response({msg: "Search complete"});
         } else if (type === "DOWNLOAD") {
-            response(searchByNumber(cadNumber));
+            await downloadLnFile();
+            response({msg: "Download complete"});
         }
     });
 })();

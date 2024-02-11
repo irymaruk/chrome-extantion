@@ -9,6 +9,16 @@
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    function waitPageLoad() {
+        if (document.readyState === "complete") {
+            return;
+        } else {
+            alert('wait for page loading...');
+            log('wait for page loading...');
+            sleep(1000).then(waitPageLoad);
+        }
+    }
+
     async function waitForElement(selector, timeout = 15000) {
         const start = Date.now();
         while (Date.now() - start < timeout) {
@@ -24,6 +34,7 @@
 
     async function searchByNumber() {
         log("searchByNumber start " + cadNumber);
+        waitPageLoad();
         const s = document.querySelector("#cadastr_find_by_cadnum_cadNum");
         s.value = cadNumber
         const b = await waitForElement("div.box-footer.text-right button");
@@ -39,6 +50,7 @@
 
     async function downloadLnFile() {
             log("downloadLnFile start");
+            waitPageLoad();
             const downloadBtn = await waitForElement("#in4btn");
             downloadBtn.click();
             await sleep(1000);

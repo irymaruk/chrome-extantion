@@ -1,12 +1,18 @@
 const startUrl = 'https://e.land.gov.ua/back/parcel_registration';
 const searchUrl = 'https://e.land.gov.ua/back/cadaster/';
+let remaining = 0;
+let tab2 = null;
 
-async function changeBadge(tab) {
-    const prevState = await chrome.action.getBadgeText({tabId: tab.id});
-    const nextState = prevState === 'ON' ? 'OFF' : 'ON';
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    if (changeInfo.status == 'complete' && tab2 !== null) {
+        await setBadge(tab2, remaining);
+    }
+});
+
+async function setBadge(tab, msg) {
     await chrome.action.setBadgeText({
         tabId: tab.id,
-        text: nextState
+        text: '' + msg
     });
 }
 
@@ -28,7 +34,7 @@ function sleep(ms) {
 
 async function executeScriptWrap(tab, funcName, arguments = []) {
     return await chrome.scripting.executeScript({
-        target: {tabId: tab.id},
+        target: { tabId: tab.id },
         func: funcName,
         args: arguments
     });
@@ -57,23 +63,18 @@ async function doDownload(tab2) {
 
 chrome.action.onClicked.addListener(async (tab) => {
     if (tab.url.startsWith(startUrl)) {
-        await changeBadge(tab);
-
-        log('Here');
         const injectionResults = await executeScriptWrap(tab, getAllCadNumbers);
-
         const res = injectionResults[0].result;
         log('Extracted res = ' + res);
-        const tab2 = await chrome.tabs.create({url: searchUrl});
+        tab2 = await chrome.tabs.create({ url: searchUrl });
         await sleep(2000);
-
-        await doSearch(tab2, res[0]);
-        await doDownload(tab2);
-        
-        await chrome.tabs.update({url: searchUrl});
-        await sleep(2000);
-        
-        await doSearch(tab2, res[1]);
-        await doDownload(tab2);
+        remaining = res.length;
+        for (const cadNum of res) {
+            await chrome.tabs.update({ url: searchUrl });
+            await sleep(2000);
+            await doSearch(tab2, cadNum);
+            await doDownload(tab2);
+            await setBadge(tab2, --remaining);
+        }
     }
 });

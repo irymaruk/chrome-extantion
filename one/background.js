@@ -41,7 +41,7 @@ async function executeScriptWrap(tab, funcName, arguments = []) {
 }
 
 async function doSearch(tab2, cadNumber) {
-    log("Search start");
+    log("Search start " + cadNumber);
     let searchResp = await chrome.tabs.sendMessage(tab2.id, {
         type: "SEARCH",
         cadNumber: cadNumber
@@ -56,7 +56,7 @@ async function doDownload(tab2) {
     let downloadResp = await chrome.tabs.sendMessage(tab2.id, {
         type: "DOWNLOAD"
     });
-    await sleep(2000);
+    await sleep(3000);
     log("Download finished " + downloadResp);
 }
 

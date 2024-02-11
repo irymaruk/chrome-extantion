@@ -40,12 +40,8 @@
         const b = await waitForElement("div.box-footer.text-right button");
         s.dispatchEvent(new Event('input', { bubbles: true }));
         b.click();
-        await sleep(1000);
         log("searchByNumber finish " + cadNumber);
         return "SEARCH_DONE";
-        // return new Promise((resolve, reject) => {        
-        //     resolve("SEARCH_DONE");
-        // });
     }
 
     async function downloadLnFile() {
@@ -53,7 +49,6 @@
             waitPageLoad();
             const downloadBtn = await waitForElement("#in4btn");
             downloadBtn.click();
-            await sleep(1000);
             return "DOWNLOAD_COMPLEATED";
     }
 

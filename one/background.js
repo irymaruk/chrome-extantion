@@ -22,6 +22,10 @@ function log(msg) {
     console.info(new Date().toLocaleTimeString() + " " + msg);
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function executeScriptWrap(tab, funcName, arguments = []) {
     return await chrome.scripting.executeScript({
         target: {tabId: tab.id},
@@ -41,14 +45,16 @@ chrome.action.onClicked.addListener(async (tab) => {
         const res = injectionResults[0].result;
         log('Extracted res = ' + res);
         const tab2 = await chrome.tabs.create({url: searchUrl});
+        await sleep(3000);
 
         log("Search start");
         let searchResp = await chrome.tabs.sendMessage(tab2.id, {
             type: "SEARCH",
             cadNumber: '0721486901:01:001:1069'
         });
-        log("Search finished " + searchResp);
+        log("Search finished: " + searchResp.msg);
 
+        await sleep(3000);
         log("Download start");
         let downloadResp = await chrome.tabs.sendMessage(tab2.id, {
             type: "DOWNLOAD"

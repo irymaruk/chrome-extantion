@@ -1,4 +1,5 @@
 (() => {
+    let cadNumber = '';
 
     function log(msg) {
         console.info(new Date().toLocaleTimeString() + " " + msg);
@@ -13,20 +14,23 @@
         while (Date.now() - start < timeout) {
             const el = document.querySelector(selector);
             if (el) {
+                log(el)
                 return el;
             }
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
+        log("element not found for selector: " + selector)
         return null;
     }
 
-    async function searchByNumber(cadNum) {
-        console.info("searchByNumber start info " + cadNum)
-        log("searchByNumber start");
-        const searchInput = await waitForElement("#cadastr_find_by_cadnum_cadNum");
-        await searchInput.value = '0721486901:01:001:1069';
-        document.querySelector("div.box-footer.text-right button").click();
-        await sleep(1000);
+    async function searchByNumber() {
+        log("searchByNumber start " + cadNumber);
+        const s = document.querySelector("#cadastr_find_by_cadnum_cadNum");
+        s.value = cadNumber
+        const b = await waitForElement("div.box-footer.text-right button");
+        s.dispatchEvent(new Event('input', {bubbles: true}));
+        b.click();
+        return new Promise(resolve => {msg: "SEARCH_DONE"});
     }
 
     async function downloadLnFile() {
@@ -37,13 +41,12 @@
     }
 
 
-    chrome.runtime.onMessage.addListener(async (obj, sender, response) => {
-        const {type, cadNumber} = obj;
-        if (type === "SEARCH") {
-            await searchByNumber(cadNumber);
-            response({msg: "Search complete"});
-        } else if (type === "DOWNLOAD") {
-            await downloadLnFile();
+    chrome.runtime.onMessage.addListener((obj, sender, response) => {
+        if (obj.type === "SEARCH") {
+            cadNumber = obj.cadNumber;
+            response(searchByNumber());
+        } else if (obj.type === "DOWNLOAD") {
+            downloadLnFile();
             response({msg: "Download complete"});
         }
     });

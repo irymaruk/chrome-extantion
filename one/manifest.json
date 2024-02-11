@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Download all cadastr numbers",
-  "description": "Start from Форма реєстрації",
-  "version": "1.0",
+  "name": "DownloadCadNum",
+  "description": "Download ln4 files for all casastr numbers",
+  "version": "0.1",
   "background": {
     "service_worker": "background.js"
   },

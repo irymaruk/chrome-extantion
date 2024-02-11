@@ -34,6 +34,26 @@ async function executeScriptWrap(tab, funcName, arguments = []) {
     });
 }
 
+async function doSearch(tab2, cadNumber) {
+    log("Search start");
+    let searchResp = await chrome.tabs.sendMessage(tab2.id, {
+        type: "SEARCH",
+        cadNumber: cadNumber
+    });
+    log("Search finished: " + searchResp);
+    return searchResp;
+}
+
+
+async function doDownload(tab2) {
+    log("Download start");
+    let downloadResp = await chrome.tabs.sendMessage(tab2.id, {
+        type: "DOWNLOAD"
+    });
+    await sleep(2000);
+    log("Download finished " + downloadResp);
+}
+
 
 chrome.action.onClicked.addListener(async (tab) => {
     if (tab.url.startsWith(startUrl)) {
@@ -45,20 +65,15 @@ chrome.action.onClicked.addListener(async (tab) => {
         const res = injectionResults[0].result;
         log('Extracted res = ' + res);
         const tab2 = await chrome.tabs.create({url: searchUrl});
-        await sleep(3000);
+        await sleep(2000);
 
-        log("Search start");
-        let searchResp = await chrome.tabs.sendMessage(tab2.id, {
-            type: "SEARCH",
-            cadNumber: '0721486901:01:001:1069'
-        });
-        log("Search finished: " + searchResp.msg);
-
-        await sleep(3000);
-        log("Download start");
-        let downloadResp = await chrome.tabs.sendMessage(tab2.id, {
-            type: "DOWNLOAD"
-        });
-        log("Download finished " + downloadResp);
+        await doSearch(tab2, res[0]);
+        await doDownload(tab2);
+        
+        await chrome.tabs.update({url: searchUrl});
+        await sleep(2000);
+        
+        await doSearch(tab2, res[1]);
+        await doDownload(tab2);
     }
 });

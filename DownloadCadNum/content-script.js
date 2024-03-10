@@ -1,5 +1,4 @@
 (() => {
-    let cadNumber = '';
 
     function log(msg) {
         console.info(new Date().toLocaleTimeString() + " " + msg);
@@ -32,7 +31,7 @@
         throw new Error('element not found for selector: ' + selector);
     }
 
-    async function searchByNumber() {
+    async function searchByNumber(cadNumber) {
         log("searchByNumber start " + cadNumber);
         waitPageLoad();
         const s = document.querySelector("#cadastr_find_by_cadnum_cadNum");
@@ -41,7 +40,7 @@
         s.dispatchEvent(new Event('input', { bubbles: true }));
         b.click();
         log("searchByNumber finish " + cadNumber);
-        return "SEARCH_DONE";
+        return "SEARCH_DONE for " + cadNumber;
     }
 
     async function downloadLnFile() {
@@ -49,18 +48,22 @@
             waitPageLoad();
             const downloadBtn = await waitForElement("#in4btn");
             downloadBtn.click();
+            await new Promise(r => setTimeout(r, 2000));
             return "DOWNLOAD_COMPLEATED";
     }
 
 
     chrome.runtime.onMessage.addListener((obj, sender, response) => {
         if (obj.type === "SEARCH") {
-            cadNumber = obj.cadNumber;
-            let res = searchByNumber();
-            response(res);
+            searchByNumber(obj.cadNumber).then(result => {
+                response({complete: true, result: result});
+              });
+            return true;
         } else if (obj.type === "DOWNLOAD") {
-            let res = downloadLnFile();
-            response(res);
+            downloadLnFile().then(result => {
+                response({complete: true, result: result});
+              });
+            return true;
         }
     });
 })();

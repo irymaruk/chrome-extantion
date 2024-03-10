@@ -2,12 +2,12 @@
   "manifest_version": 3,
   "name": "DownloadCadNum",
   "description": "Download ln4 files for all casastr numbers",
-  "version": "0.1",
+  "version": "0.2",
   "background": {
     "service_worker": "background.js"
   },
   "action": {},
-  "permissions": ["scripting", "activeTab", "tabs"],
+  "permissions": ["scripting", "activeTab", "tabs", "webRequest"],
   "host_permissions": [
     "https://e.land.gov.ua/*"
   ],

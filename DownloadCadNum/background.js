@@ -40,9 +40,22 @@ async function executeScriptWrap(tab, funcName, arguments = []) {
     });
 }
 
-async function doSearch(tab2, cadNumber) {
+
+function sendMessagePromise(msg) {
+    return new Promise((resolve, reject) => {
+        chrome.tabs.sendMessage(tab2.id, msg, response => {
+            if(response.complete) {
+                resolve(response.result);
+            } else {
+                reject('Something wrong');
+            }
+        });
+    });
+}
+
+async function doSearch(cadNumber) {
     log("Search start " + cadNumber);
-    let searchResp = await chrome.tabs.sendMessage(tab2.id, {
+    let searchResp = await sendMessagePromise({
         type: "SEARCH",
         cadNumber: cadNumber
     });
@@ -51,12 +64,11 @@ async function doSearch(tab2, cadNumber) {
 }
 
 
-async function doDownload(tab2) {
+async function doDownload() {
     log("Download start");
-    let downloadResp = await chrome.tabs.sendMessage(tab2.id, {
+    let downloadResp = await sendMessagePromise({
         type: "DOWNLOAD"
     });
-    await sleep(3000);
     log("Download finished " + downloadResp);
 }
 
@@ -72,8 +84,8 @@ chrome.action.onClicked.addListener(async (tab) => {
         for (const cadNum of res) {
             await chrome.tabs.update({ url: searchUrl });
             await sleep(2000);
-            await doSearch(tab2, cadNum);
-            await doDownload(tab2);
+            await doSearch(cadNum);
+            await doDownload();
             await setBadge(tab2, --remaining);
         }
     }

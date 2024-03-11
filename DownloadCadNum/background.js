@@ -2,11 +2,15 @@ const startUrl = 'https://e.land.gov.ua/back/parcel_registration';
 const searchUrl = 'https://e.land.gov.ua/back/cadaster/';
 let remaining = 0;
 let tab2 = null;
+let isTab2Loaded = false;
 let lastDownloadedUrl = null;
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status == 'complete' && tab2 !== null) {
         setBadge(remaining);
+    }
+    if (changeInfo.status == 'complete' && tab.id === tab2?.id) {
+        isTab2Loaded = true;
     }
 });
 
@@ -100,8 +104,9 @@ chrome.action.onClicked.addListener(async (tab) => {
             tab2 = tab;
         });
         for (const cadNum of res) {
+            isTab2Loaded = false;
             await chrome.tabs.update({ url: searchUrl });
-            await sleep(1000);
+            await waitForFunction(() => isTab2Loaded);
             await doSearch(cadNum);
             await doDownload();
             await setBadge(--remaining);

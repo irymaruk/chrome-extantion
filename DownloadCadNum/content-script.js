@@ -8,13 +8,14 @@
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    function waitPageLoad() {
+    async function waitPageLoad() {
         if (document.readyState === "complete") {
+            log("Page loaded");
             return;
         } else {
-            alert('wait for page loading...');
             log('wait for page loading...');
-            sleep(1000).then(waitPageLoad);
+            await sleep(1000);
+            await waitPageLoad();
         }
     }
 
@@ -32,24 +33,20 @@
     }
 
     async function searchByNumber(cadNumber) {
-        log("searchByNumber start " + cadNumber);
-        waitPageLoad();
+        await waitPageLoad();
         const s = document.querySelector("#cadastr_find_by_cadnum_cadNum");
         s.value = cadNumber
         const b = await waitForElement("div.box-footer.text-right button");
         s.dispatchEvent(new Event('input', { bubbles: true }));
         b.click();
-        log("searchByNumber finish " + cadNumber);
         return "SEARCH_DONE for " + cadNumber;
     }
 
     async function downloadLnFile() {
-            log("downloadLnFile start");
-            waitPageLoad();
+            await waitPageLoad();
             const downloadBtn = await waitForElement("#in4btn");
             downloadBtn.click();
-            await new Promise(r => setTimeout(r, 2000));
-            return "DOWNLOAD_COMPLEATED";
+            return "DOWNLOAD_BUTTON_CLICKED";
     }
 
 
